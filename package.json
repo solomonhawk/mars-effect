@@ -1,0 +1,29 @@
+{
+  "name": "mars-effect",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node -r tsconfig-paths/register src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "effect": "^3.3.1"
+  },
+  "devDependencies": {
+    "@effect/language-service": "^0.1.0",
+    "@types/node": "^20.14.2",
+    "eslint": "^9.4.0",
+    "prettier": "^3.3.2",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.4.5"
+  },
+  "prettier": {
+    "semi": true,
+    "singleQuote": false,
+    "trailingComma": "all"
+  }
+}
