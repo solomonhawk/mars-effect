@@ -1,5 +1,5 @@
-import { Context, Effect, Layer } from "effect";
-import { isSuccess } from "effect/Exit";
+import { Context, Effect, Exit, Layer } from "effect";
+import { isFailure, isSuccess } from "effect/Exit";
 import * as Ref from "effect/Ref";
 import { Config } from "~/layers/config";
 import { CommandService, CommandServiceDefaultImpl } from "~/services/command";
@@ -9,6 +9,7 @@ describe("without any obstacles", () => {
   const ConfigTest = Layer.succeed(
     Config,
     Config.of({
+      logMoves: false,
       initialPosition: { x: 0, y: 0 },
       initialDirection: "N",
       planet: {
@@ -23,14 +24,18 @@ describe("without any obstacles", () => {
     Context.add(CommandService, CommandServiceDefaultImpl),
   );
 
-  it("follows a `f` command", async () => {
-    const roverRef = Effect.runSync(
+  let roverRef: Ref.Ref<Rover>;
+
+  beforeEach(() => {
+    roverRef = Effect.runSync(
       Ref.make<Rover>({
         direction: "N",
         position: { x: 0, y: 0 },
       }),
     );
+  });
 
+  it("follows a `f` command", async () => {
     const program = Effect.gen(function* (_) {
       const commandService = yield* _(CommandService);
 
@@ -50,13 +55,6 @@ describe("without any obstacles", () => {
   });
 
   it("follows a `b` command", async () => {
-    const roverRef = Effect.runSync(
-      Ref.make<Rover>({
-        direction: "N",
-        position: { x: 0, y: 0 },
-      }),
-    );
-
     const program = Effect.gen(function* (_) {
       const commandService = yield* _(CommandService);
 
@@ -76,13 +74,6 @@ describe("without any obstacles", () => {
   });
 
   it("follows a `l` command", async () => {
-    const roverRef = Effect.runSync(
-      Ref.make<Rover>({
-        direction: "N",
-        position: { x: 0, y: 0 },
-      }),
-    );
-
     const program = Effect.gen(function* (_) {
       const commandService = yield* _(CommandService);
 
@@ -102,13 +93,6 @@ describe("without any obstacles", () => {
   });
 
   it("follows a `r` command", async () => {
-    const roverRef = Effect.runSync(
-      Ref.make<Rover>({
-        direction: "N",
-        position: { x: 0, y: 0 },
-      }),
-    );
-
     const program = Effect.gen(function* (_) {
       const commandService = yield* _(CommandService);
 
@@ -125,5 +109,72 @@ describe("without any obstacles", () => {
 
     expect(isSuccess(result)).toBe(true);
     expect(rover.direction).toEqual("E");
+  });
+});
+
+describe("with obstacles", () => {
+  const ConfigTest = Layer.succeed(
+    Config,
+    Config.of({
+      logMoves: false,
+      initialPosition: { x: 0, y: 0 },
+      initialDirection: "N",
+      planet: {
+        height: 5,
+        width: 5,
+        obstacles: [{ x: 2, y: 2 }],
+      },
+    }),
+  );
+
+  const context = Context.empty().pipe(
+    Context.add(CommandService, CommandServiceDefaultImpl),
+  );
+
+  let roverRef: Ref.Ref<Rover>;
+
+  beforeEach(() => {
+    roverRef = Effect.runSync(
+      Ref.make<Rover>({
+        direction: "N",
+        position: { x: 0, y: 0 },
+      }),
+    );
+  });
+
+  it("follows command until an obstacle is encountered and ignores the rest", async () => {
+    const program = Effect.gen(function* (_) {
+      const commandService = yield* _(CommandService);
+
+      yield* _(
+        commandService.runCommands(roverRef, [
+          "r", // 0,0 E
+          "f", // 1,0 E
+          "f", // 2,0 E
+          "r", // 2,0 S
+          "f", // 2,1 S
+          "f", // 2,2 S (x)
+          "f", // 2,3 S
+          "l", // 2,3 E
+          "b", // 1,3 E
+        ]),
+      );
+    });
+
+    const runnable = program.pipe(
+      Effect.provide(ConfigTest),
+      Effect.provide(context),
+    );
+
+    const result = await Effect.runPromiseExit(runnable);
+    const rover = await Effect.runPromise(roverRef.get);
+
+    expect(isFailure(result)).toBe(true);
+    expect(rover.position).toEqual({ x: 2, y: 1 });
+
+    Exit.mapError(result, (e) => {
+      expect(e.message).toBe("Hit something!");
+      expect(e.position).toEqual({ x: 2, y: 2 });
+    });
   });
 });

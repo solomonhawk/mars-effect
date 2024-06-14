@@ -33,40 +33,54 @@ function runCommand(
   command: Command,
 ): Effect.Effect<Rover, ObstacleError, Config> {
   return Effect.gen(function* (_) {
+    const { logMoves } = yield* _(Config);
+
+    let nextRover = { ...rover, position: { ...rover.position } };
+
     switch (command) {
       case "b":
       case "f": {
-        const nextRover = {
-          ...rover,
-          position: yield* _(
-            move(rover.position, rover.direction, command === "b"),
-          ),
-        } satisfies Rover;
-
-        yield* Effect.log(
-          `moving ${command} ${rover.direction} => ${JSON.stringify(nextRover, null, 2)}`,
+        nextRover.position = yield* _(
+          move(rover.position, rover.direction, command === "b"),
         );
 
-        return yield* Effect.succeed(nextRover);
+        if (logMoves) {
+          yield* Effect.log(
+            `moving ${command} ${rover.direction} => ${JSON.stringify(nextRover, null, 2)}`,
+          );
+        }
+
+        break;
       }
 
       case "l":
       case "r": {
-        const nextRover = {
-          ...rover,
-          direction: yield* _(rotate(rover.direction, command === "r")),
-        } satisfies Rover;
-
-        yield* Effect.log(
-          `turning ${command} from ${rover.direction} => ${JSON.stringify(nextRover, null, 2)}`,
+        nextRover.direction = yield* _(
+          rotate(rover.direction, command === "r"),
         );
 
-        return yield* Effect.succeed(nextRover);
+        if (logMoves) {
+          yield* Effect.log(
+            `turning ${command} from ${rover.direction} => ${JSON.stringify(nextRover, null, 2)}`,
+          );
+        }
+
+        break;
       }
 
       default:
         return yield* Effect.succeed(rover);
     }
+
+    const collision = yield* _(detectCollision(nextRover));
+
+    if (collision) {
+      return yield* _(
+        Effect.fail(new ObstacleError("Hit something!", nextRover.position)),
+      );
+    }
+
+    return yield* Effect.succeed(nextRover);
   });
 }
 
@@ -112,6 +126,16 @@ function move(
     }
 
     return yield* Effect.succeed(nextPosition);
+  });
+}
+
+function detectCollision(rover: Rover): Effect.Effect<boolean, never, Config> {
+  return Effect.gen(function* (_) {
+    const { planet } = yield* _(Config);
+
+    return planet.obstacles.some((obstacle) => {
+      return rover.position.x === obstacle.x && rover.position.y === obstacle.y;
+    });
   });
 }
 
