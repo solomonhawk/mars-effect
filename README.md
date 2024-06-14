@@ -8,6 +8,12 @@ An implementation of the mars rover kata in TypeScript using [EffectTS](https://
 - [Effect Intro Article](https://ybogomolov.me/01-effect-intro)
 - [Effect Crash Course Repo](https://github.com/pigoz/effect-crashcourse/blob/master/001-basic.ts)
 
+## Demo
+
+<video width="100%" controls>
+  <source src="./assets/cli.mov" type="video/mp4">
+</video>
+
 ## Development & Usage
 
 Install NPM dependencies:
