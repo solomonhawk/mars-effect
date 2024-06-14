@@ -41,6 +41,7 @@ export function makeObstacles(
 
 export function printPlanetState(
   rover: Rover,
+  obstacleCollision?: Position,
 ): Effect.Effect<void, never, Config> {
   return Effect.gen(function* (_) {
     const { planet } = yield* _(Config);
@@ -59,7 +60,15 @@ export function printPlanetState(
         if (rover.position.x === x && rover.position.y === y) {
           planetView += Terminal.highlight(roverIcon(rover.direction));
         } else if (obstacles[y][x]) {
-          planetView += Terminal.emphasize("⩍");
+          if (
+            obstacleCollision &&
+            obstacleCollision.x === x &&
+            obstacleCollision.y === y
+          ) {
+            planetView += Terminal.collision("⩍");
+          } else {
+            planetView += Terminal.emphasize("⩍");
+          }
         } else {
           planetView += "·";
         }

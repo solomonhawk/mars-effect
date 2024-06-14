@@ -7,4 +7,6 @@ export const Terminal = {
     `${styles.color.green.open}${styles.modifier.bold.open}${s}${styles.modifier.bold.close}${styles.color.close}`,
   emphasize: (s: string) =>
     `${styles.modifier.bold.open}${s}${styles.modifier.bold.close}`,
+  collision: (s: string) =>
+    `${styles.color.red.open}${styles.modifier.bold.open}${s}${styles.modifier.bold.close}${styles.color.close}`,
 };

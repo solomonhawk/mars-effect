@@ -1,16 +1,16 @@
-import { NodeContext, NodeRuntime } from "@effect/platform-node";
 import { Command as Cmd, Options, Prompt, ValidationError } from "@effect/cli";
-import { Effect, Either, Ref } from "effect";
+import { p } from "@effect/cli/HelpDoc";
+import { NodeContext, NodeRuntime } from "@effect/platform-node";
+import { Effect, Ref } from "effect";
+import { makeObstacles, printPlanetState } from "./helpers";
+import { Config } from "./layers/config";
+import { Position } from "./position";
 import {
   CommandService,
   CommandServiceDefaultImpl,
   isCommand,
 } from "./services/command";
-import { Config } from "./layers/config";
 import { Command, Rover } from "./types";
-import { makeObstacles, printPlanetState } from "./helpers";
-import { Position } from "./position";
-import { p } from "@effect/cli/HelpDoc";
 
 const command = Cmd.make(
   "mars-rover",
@@ -101,30 +101,41 @@ const command = Cmd.make(
           return;
         }
 
-        const result = yield* _(
-          Effect.either(
-            commandService.runCommands(roverRef, cmds, (rover) => {
+        yield* _(
+          commandService
+            .runCommands(roverRef, cmds, (rover) => {
               return Effect.gen(function* (_) {
                 yield* _(printPlanetState(rover));
                 yield* _(Effect.sleep(200));
               });
-            }),
-          ),
-        );
-
-        yield* _(printPlanetState(yield* _(roverRef.get)));
-
-        if (Either.isLeft(result)) {
-          yield* _(Effect.log(result.left.print()));
-        } else {
-          const rover = yield* _(roverRef.get);
-
-          yield* _(
-            Effect.log(
-              `Rover is now at x=${rover.position.x}, y=${rover.position.y}, facing ${rover.direction}`,
+            })
+            .pipe(
+              Effect.matchEffect({
+                onSuccess: () => {
+                  return Ref.get(roverRef).pipe(
+                    Effect.tap((rover) => {
+                      return Effect.all([
+                        printPlanetState(rover),
+                        Effect.log(
+                          `Rover is now at x=${rover.position.x}, y=${rover.position.y}, facing ${rover.direction}`,
+                        ),
+                      ]);
+                    }),
+                  );
+                },
+                onFailure: (error) => {
+                  return Ref.get(roverRef).pipe(
+                    Effect.tap((rover) => {
+                      return Effect.all([
+                        printPlanetState(rover, error.position),
+                        Effect.log(error.print()),
+                      ]);
+                    }),
+                  );
+                },
+              }),
             ),
-          );
-        }
+        );
       }
     }).pipe(
       Effect.provideService(Config, {
