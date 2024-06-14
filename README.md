@@ -45,3 +45,4 @@ Run tests in watch mode:
 - Everything is more complicated, due to the indirection introduced by Effect
 - It's different (and a bit unfamiliar) to think about structuring an application using effects rather than the usual data/immediate functions/control flow
 - `Effect.gen(..)` is super useful and nice to write except for all the `yield* _(..)` noise, which is a bummer
+- One of the drawbacks that I dislike is that it feels like a lot of code must be "framework/library" code rather than app/domain code - I don't find the result to be very readable
