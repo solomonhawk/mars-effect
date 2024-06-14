@@ -40,11 +40,10 @@ export function makeObstacles(
 }
 
 export function printPlanetState(
-  roverRef: Ref.Ref<Rover>,
+  rover: Rover,
 ): Effect.Effect<void, never, Config> {
   return Effect.gen(function* (_) {
     const { planet } = yield* _(Config);
-    const rover = yield* _(roverRef.get);
     const obstacles = new Array(planet.height)
       .fill(null)
       .map(() => new Array(planet.width).fill(false));

@@ -71,7 +71,7 @@ const command = Cmd.make(
         }),
       );
 
-      yield* _(printPlanetState(roverRef));
+      yield* _(printPlanetState(yield* _(roverRef.get)));
 
       while (true) {
         const cmds = (yield* _(
@@ -102,10 +102,17 @@ const command = Cmd.make(
         }
 
         const result = yield* _(
-          Effect.either(commandService.runCommands(roverRef, cmds)),
+          Effect.either(
+            commandService.runCommands(roverRef, cmds, (rover) => {
+              return Effect.gen(function* (_) {
+                yield* _(printPlanetState(rover));
+                yield* _(Effect.sleep(200));
+              });
+            }),
+          ),
         );
 
-        yield* _(printPlanetState(roverRef));
+        yield* _(printPlanetState(yield* _(roverRef.get)));
 
         if (Either.isLeft(result)) {
           yield* _(Effect.log(result.left.print()));
