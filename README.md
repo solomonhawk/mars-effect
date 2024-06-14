@@ -10,9 +10,7 @@ An implementation of the mars rover kata in TypeScript using [EffectTS](https://
 
 ## Demo
 
-<video width="100%" controls>
-  <source src="./assets/cli.mov" type="video/mp4">
-</video>
+![](./assets/cli.mov)
 
 ## Development & Usage
 
