@@ -84,21 +84,21 @@ const command = Cmd.make(
           return;
         }
 
-        const result = yield* _(
-          Effect.either(commandService.runCommands(roverRef, cmds)),
+        yield* _(
+          commandService.runCommands(roverRef, cmds).pipe(
+            Effect.catchAll((error) => {
+              return Effect.logError(error.print());
+            }),
+          ),
         );
 
         yield* _(printRoverState(roverRef));
-
-        if (Either.isLeft(result)) {
-          yield* _(Effect.logError(result.left.print()));
-        }
       }
     }).pipe(
       Effect.provideService(Config, {
-        logMoves: false,
         initialDirection: opts.initialDirection,
         initialPosition,
+        logMoves: false,
         planet: {
           width: opts.width,
           height: opts.height,

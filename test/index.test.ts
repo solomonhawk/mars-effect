@@ -10,9 +10,9 @@ describe("without any obstacles", () => {
   const ConfigTest = Layer.succeed(
     Config,
     Config.of({
-      logMoves: false,
       initialPosition: new Position(0, 0),
       initialDirection: "N",
+      logMoves: false,
       planet: {
         height: 5,
         width: 5,
@@ -117,9 +117,9 @@ describe("with obstacles", () => {
   const ConfigTest = Layer.succeed(
     Config,
     Config.of({
-      logMoves: false,
       initialPosition: new Position(0, 0),
       initialDirection: "N",
+      logMoves: false,
       planet: {
         height: 5,
         width: 5,

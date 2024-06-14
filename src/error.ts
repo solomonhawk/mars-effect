@@ -8,6 +8,9 @@ export class ObstacleError extends Error {
     readonly position: Position,
   ) {
     super(message);
+
+    Object.setPrototypeOf(this, ObstacleError.prototype);
+
     this.name = this.constructor.name;
   }
 
