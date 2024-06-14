@@ -10,6 +10,7 @@ describe("without any obstacles", () => {
   const ConfigTest = Layer.succeed(
     Config,
     Config.of({
+      playbackSpeed: 200,
       initialPosition: new Position(0, 0),
       initialDirection: "N",
       logMoves: false,
@@ -37,10 +38,10 @@ describe("without any obstacles", () => {
   });
 
   it("follows a `f` command", async () => {
-    const program = Effect.gen(function* (_) {
-      const commandService = yield* _(CommandService);
+    const program = Effect.gen(function* () {
+      const commandService = yield* CommandService;
 
-      yield* _(commandService.runCommands(roverRef, ["f"]));
+      yield* commandService.runCommands(roverRef, ["f"]);
     });
 
     const runnable = program.pipe(
@@ -56,10 +57,10 @@ describe("without any obstacles", () => {
   });
 
   it("follows a `b` command", async () => {
-    const program = Effect.gen(function* (_) {
-      const commandService = yield* _(CommandService);
+    const program = Effect.gen(function* () {
+      const commandService = yield* CommandService;
 
-      yield* _(commandService.runCommands(roverRef, ["b"]));
+      yield* commandService.runCommands(roverRef, ["b"]);
     });
 
     const runnable = program.pipe(
@@ -75,10 +76,10 @@ describe("without any obstacles", () => {
   });
 
   it("follows a `l` command", async () => {
-    const program = Effect.gen(function* (_) {
-      const commandService = yield* _(CommandService);
+    const program = Effect.gen(function* () {
+      const commandService = yield* CommandService;
 
-      yield* _(commandService.runCommands(roverRef, ["l"]));
+      yield* commandService.runCommands(roverRef, ["l"]);
     });
 
     const runnable = program.pipe(
@@ -94,10 +95,10 @@ describe("without any obstacles", () => {
   });
 
   it("follows a `r` command", async () => {
-    const program = Effect.gen(function* (_) {
-      const commandService = yield* _(CommandService);
+    const program = Effect.gen(function* () {
+      const commandService = yield* CommandService;
 
-      yield* _(commandService.runCommands(roverRef, ["r"]));
+      yield* commandService.runCommands(roverRef, ["r"]);
     });
 
     const runnable = program.pipe(
@@ -117,6 +118,7 @@ describe("with obstacles", () => {
   const ConfigTest = Layer.succeed(
     Config,
     Config.of({
+      playbackSpeed: 200,
       initialPosition: new Position(0, 0),
       initialDirection: "N",
       logMoves: false,
@@ -144,22 +146,20 @@ describe("with obstacles", () => {
   });
 
   it("follows commands until an obstacle is encountered and ignores the rest", async () => {
-    const program = Effect.gen(function* (_) {
-      const commandService = yield* _(CommandService);
+    const program = Effect.gen(function* () {
+      const commandService = yield* CommandService;
 
-      yield* _(
-        commandService.runCommands(roverRef, [
-          "r", // 0,0 E
-          "f", // 1,0 E
-          "f", // 2,0 E
-          "r", // 2,0 S
-          "f", // 2,1 S
-          "f", // 2,2 S (x)
-          "f", // 2,3 S
-          "l", // 2,3 E
-          "b", // 1,3 E
-        ]),
-      );
+      yield* commandService.runCommands(roverRef, [
+        "r", // 0,0 E
+        "f", // 1,0 E
+        "f", // 2,0 E
+        "r", // 2,0 S
+        "f", // 2,1 S
+        "f", // 2,2 S (x)
+        "f", // 2,3 S
+        "l", // 2,3 E
+        "b", // 1,3 E
+      ]);
     });
 
     const runnable = program.pipe(

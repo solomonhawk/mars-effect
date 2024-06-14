@@ -4,18 +4,16 @@ import { Config } from "./layers/config";
 import { CommandService } from "./services/command";
 import { Rover } from "./types";
 
-export const program = Effect.gen(function* (_) {
-  const config = yield* _(Config);
-  const commandService = yield* _(CommandService);
+export const program = Effect.gen(function* () {
+  const config = yield* Config;
+  const commandService = yield* CommandService;
 
-  const roverRef = yield* _(
-    Ref.make<Rover>({
-      direction: config.initialDirection,
-      position: config.initialPosition,
-    }),
-  );
+  const roverRef = yield* Ref.make<Rover>({
+    direction: config.initialDirection,
+    position: config.initialPosition,
+  });
 
   yield* commandService.runCommands(roverRef, ["f"]);
 
-  return yield* _(roverRef.get);
+  return yield* roverRef.get;
 });

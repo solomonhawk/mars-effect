@@ -1,4 +1,4 @@
-import { Context, Layer, Ref } from "effect";
+import { Context, Layer } from "effect";
 import { Position } from "~/position";
 import { Direction, Planet } from "~/types";
 

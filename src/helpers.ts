@@ -1,4 +1,4 @@
-import { Effect, Ref } from "effect";
+import { Effect } from "effect";
 import { Direction, Rover } from "./types";
 import { Config } from "./layers/config";
 import { Position } from "./position";
@@ -43,8 +43,8 @@ export function printPlanetState(
   rover: Rover,
   obstacleCollision?: Position,
 ): Effect.Effect<void, never, Config> {
-  return Effect.gen(function* (_) {
-    const { planet } = yield* _(Config);
+  return Effect.gen(function* () {
+    const { planet } = yield* Config;
     const obstacles = new Array(planet.height)
       .fill(null)
       .map(() => new Array(planet.width).fill(false));
@@ -81,7 +81,7 @@ export function printPlanetState(
 
     planetView += "\n";
 
-    yield* _(Effect.log(Terminal.clear(planetView)));
+    yield* Effect.log(Terminal.clear(planetView));
   });
 }
 

@@ -26,16 +26,16 @@ export type CommandServiceAPI = Context.Tag.Service<CommandService>;
 
 export const CommandServiceDefaultImpl = {
   runCommands(roverRef, commands, onStep) {
-    return Effect.gen(function* (_) {
+    return Effect.gen(function* () {
       let i = 0;
-      let currentRover = yield* _(roverRef.get);
+      let currentRover = yield* roverRef.get;
 
       for (const c of commands) {
-        currentRover = yield* _(runCommand(currentRover, c));
-        yield* _(Ref.set(roverRef, currentRover));
+        currentRover = yield* runCommand(currentRover, c);
+        yield* Ref.set(roverRef, currentRover);
 
         if (onStep) {
-          yield* _(onStep(currentRover, i === commands.length - 1));
+          yield* onStep(currentRover, i === commands.length - 1);
         }
 
         i++;
@@ -48,8 +48,8 @@ function runCommand(
   rover: Rover,
   command: Command,
 ): Effect.Effect<Rover, ObstacleError, Config> {
-  return Effect.gen(function* (_) {
-    const { logMoves } = yield* _(Config);
+  return Effect.gen(function* () {
+    const { logMoves } = yield* Config;
 
     let nextRover = {
       ...rover,
@@ -59,8 +59,10 @@ function runCommand(
     switch (command) {
       case "b":
       case "f": {
-        nextRover.position = yield* _(
-          move(rover.position, rover.direction, command === "b"),
+        nextRover.position = yield* move(
+          rover.position,
+          rover.direction,
+          command === "b",
         );
 
         if (logMoves) {
@@ -74,9 +76,7 @@ function runCommand(
 
       case "l":
       case "r": {
-        nextRover.direction = yield* _(
-          rotate(rover.direction, command === "r"),
-        );
+        nextRover.direction = yield* rotate(rover.direction, command === "r");
 
         if (logMoves) {
           yield* Effect.log(
@@ -91,11 +91,11 @@ function runCommand(
         return yield* Effect.succeed(rover);
     }
 
-    const collision = yield* _(detectCollision(nextRover));
+    const collision = yield* detectCollision(nextRover);
 
     if (collision) {
-      return yield* _(
-        Effect.fail(new ObstacleError("Hit something!", nextRover.position)),
+      return yield* Effect.fail(
+        new ObstacleError("Hit something!", nextRover.position),
       );
     }
 
@@ -124,8 +124,8 @@ function move(
   direction: Direction,
   reverse: boolean,
 ): Effect.Effect<Position, never, Config> {
-  return Effect.gen(function* (_) {
-    const { planet } = yield* _(Config);
+  return Effect.gen(function* () {
+    const { planet } = yield* Config;
     const movement = reverse ? -1 : 1;
     let nextPosition = new Position(position.x, position.y);
 
@@ -149,8 +149,8 @@ function move(
 }
 
 function detectCollision(rover: Rover): Effect.Effect<boolean, never, Config> {
-  return Effect.gen(function* (_) {
-    const { planet } = yield* _(Config);
+  return Effect.gen(function* () {
+    const { planet } = yield* Config;
 
     return planet.obstacles.some((obstacle) => {
       return rover.position.x === obstacle.x && rover.position.y === obstacle.y;
