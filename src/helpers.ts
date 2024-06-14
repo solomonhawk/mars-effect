@@ -53,7 +53,7 @@ export function printPlanetState(
       obstacles[obstacle.y][obstacle.x] = true;
     }
 
-    let planetView = "\n\n";
+    let planetView = "";
 
     for (let y = 0; y < planet.height; y++) {
       for (let x = 0; x < planet.width; x++) {

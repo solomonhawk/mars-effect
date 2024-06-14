@@ -5,7 +5,7 @@
   "main": "src/index.ts",
   "scripts": {
     "start": "npx tsx src/index.ts",
-    "cli": "npx tsx src/cli.ts",
+    "cli": "npx tsx src/cli/index.ts",
     "test": "vitest",
     "test:watch": "vitest --watch"
   },
