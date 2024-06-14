@@ -10,7 +10,9 @@ An implementation of the mars rover kata in TypeScript using [EffectTS](https://
 
 ## Demo
 
-![](./assets/cli.mov)
+https://github.com/solomonhawk/mars-effect/assets/1037707/08a375a3-d3e8-4b08-b294-1e05ded3435a
+
+https://github.com/solomonhawk/mars-effect/assets/1037707/536e37a8-14a0-47f4-89f7-39ac0f8465b0
 
 ## Development & Usage
 
