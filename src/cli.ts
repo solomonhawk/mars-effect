@@ -1,5 +1,5 @@
 import { NodeContext, NodeRuntime } from "@effect/platform-node";
-import { Command as Cmd, Options, Prompt } from "@effect/cli";
+import { Command as Cmd, Options, Prompt, ValidationError } from "@effect/cli";
 import { Effect, Either, Ref } from "effect";
 import {
   CommandService,
@@ -8,8 +8,9 @@ import {
 } from "./services/command";
 import { Config } from "./layers/config";
 import { Command, Rover } from "./types";
-import { makeObstacles, printRoverState } from "./helpers";
+import { makeObstacles, printPlanetState } from "./helpers";
 import { Position } from "./position";
+import { p } from "@effect/cli/HelpDoc";
 
 const command = Cmd.make(
   "mars-rover",
@@ -20,11 +21,11 @@ const command = Cmd.make(
     ),
     initialX: Options.integer("initialX").pipe(
       Options.withAlias("x"),
-      Options.withDefault(0),
+      Options.withDefault(4),
     ),
     initialY: Options.integer("initialY").pipe(
       Options.withAlias("y"),
-      Options.withDefault(0),
+      Options.withDefault(4),
     ),
     width: Options.integer("width").pipe(
       Options.withAlias("w"),
@@ -44,6 +45,22 @@ const command = Cmd.make(
 
     return Effect.gen(function* (_) {
       let quit = false;
+
+      if (
+        opts.initialX < 0 ||
+        opts.initialY < 0 ||
+        opts.initialX >= opts.width ||
+        opts.initialY >= opts.height
+      ) {
+        yield* _(
+          Effect.fail(
+            ValidationError.invalidArgument(
+              p("Initial position is out of bounds"),
+            ),
+          ),
+        );
+      }
+
       const config = yield* _(Config);
       const commandService = yield* _(CommandService);
 
@@ -54,12 +71,12 @@ const command = Cmd.make(
         }),
       );
 
-      yield* _(printRoverState(roverRef));
+      yield* _(printPlanetState(roverRef));
 
       while (true) {
         const cmds = (yield* _(
           Prompt.list({
-            message: "Enter commands",
+            message: "Enter commands (or ? for help)",
             delimiter: ",",
             validate: (value) => {
               if (value === "q") {
@@ -84,15 +101,23 @@ const command = Cmd.make(
           return;
         }
 
-        yield* _(
-          commandService.runCommands(roverRef, cmds).pipe(
-            Effect.catchAll((error) => {
-              return Effect.logError(error.print());
-            }),
-          ),
+        const result = yield* _(
+          Effect.either(commandService.runCommands(roverRef, cmds)),
         );
 
-        yield* _(printRoverState(roverRef));
+        yield* _(printPlanetState(roverRef));
+
+        if (Either.isLeft(result)) {
+          yield* _(Effect.log(result.left.print()));
+        } else {
+          const rover = yield* _(roverRef.get);
+
+          yield* _(
+            Effect.log(
+              `Rover is now at x=${rover.position.x}, y=${rover.position.y}, facing ${rover.direction}`,
+            ),
+          );
+        }
       }
     }).pipe(
       Effect.provideService(Config, {

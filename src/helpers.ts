@@ -1,7 +1,8 @@
 import { Effect, Ref } from "effect";
-import { Rover } from "./types";
+import { Direction, Rover } from "./types";
 import { Config } from "./layers/config";
 import { Position } from "./position";
+import { Terminal } from "./terminal";
 
 export function makeObstacles(
   width: number,
@@ -38,7 +39,7 @@ export function makeObstacles(
   return Array.from(obstacles);
 }
 
-export function printRoverState(
+export function printPlanetState(
   roverRef: Ref.Ref<Rover>,
 ): Effect.Effect<void, never, Config> {
   return Effect.gen(function* (_) {
@@ -56,14 +57,15 @@ export function printRoverState(
 
     for (let y = 0; y < planet.height; y++) {
       for (let x = 0; x < planet.width; x++) {
-        // print the planet grid
         if (rover.position.x === x && rover.position.y === y) {
-          planetView += rover.direction;
+          planetView += Terminal.highlight(roverIcon(rover.direction));
         } else if (obstacles[y][x]) {
-          planetView += "o";
+          planetView += Terminal.emphasize("⩍");
         } else {
-          planetView += ".";
+          planetView += "·";
         }
+
+        planetView += " ";
       }
 
       planetView += "\n";
@@ -71,11 +73,19 @@ export function printRoverState(
 
     planetView += "\n";
 
-    yield* _(Effect.log(planetView));
-    yield* _(
-      Effect.log(
-        `Rover is now at x=${rover.position.x}, y=${rover.position.y}, facing ${rover.direction}`,
-      ),
-    );
+    yield* _(Effect.log(Terminal.clear(planetView)));
   });
+}
+
+function roverIcon(direction: Direction): string {
+  switch (direction) {
+    case "N":
+      return "↑";
+    case "S":
+      return "↓";
+    case "E":
+      return "→";
+    case "W":
+      return "←";
+  }
 }
