@@ -14,7 +14,10 @@ export class CommandService extends Context.Tag("@app/CommandService")<
     runCommands: (
       roverRef: Ref.Ref<Rover>,
       commands: Command[],
-      onStep?: (rover: Rover) => Effect.Effect<void, never, Config>,
+      onStep?: (
+        rover: Rover,
+        isLast: boolean,
+      ) => Effect.Effect<void, never, Config>,
     ) => Effect.Effect<void, ObstacleError, Config>;
   }
 >() {}
@@ -22,22 +25,20 @@ export class CommandService extends Context.Tag("@app/CommandService")<
 export type CommandServiceAPI = Context.Tag.Service<CommandService>;
 
 export const CommandServiceDefaultImpl = {
-  runCommands(
-    roverRef: Ref.Ref<Rover>,
-    commands: Command[],
-    onStep?: (rover: Rover) => Effect.Effect<void, never, Config>,
-  ) {
+  runCommands(roverRef, commands, onStep) {
     return Effect.gen(function* (_) {
+      let i = 0;
       let currentRover = yield* _(roverRef.get);
 
       for (const c of commands) {
         currentRover = yield* _(runCommand(currentRover, c));
+        yield* _(Ref.set(roverRef, currentRover));
 
         if (onStep) {
-          yield* _(onStep(currentRover));
+          yield* _(onStep(currentRover, i === commands.length - 1));
         }
 
-        yield* _(Ref.set(roverRef, currentRover));
+        i++;
       }
     });
   },

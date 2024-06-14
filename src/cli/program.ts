@@ -48,10 +48,13 @@ export const program = Effect.gen(function* (_) {
 
     yield* _(
       commandService
-        .runCommands(roverRef, cmds, (rover) => {
+        .runCommands(roverRef, cmds, (rover, isLast) => {
           return Effect.gen(function* (_) {
             yield* _(printPlanetState(rover));
-            yield* _(Effect.sleep(config.playbackSpeed));
+
+            if (!isLast) {
+              yield* _(Effect.sleep(config.playbackSpeed));
+            }
           });
         })
         .pipe(
