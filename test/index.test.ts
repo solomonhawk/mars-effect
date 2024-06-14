@@ -2,6 +2,7 @@ import { Context, Effect, Exit, Layer } from "effect";
 import { isFailure, isSuccess } from "effect/Exit";
 import * as Ref from "effect/Ref";
 import { Config } from "~/layers/config";
+import { Position } from "~/position";
 import { CommandService, CommandServiceDefaultImpl } from "~/services/command";
 import { Rover } from "~/types";
 
@@ -10,7 +11,7 @@ describe("without any obstacles", () => {
     Config,
     Config.of({
       logMoves: false,
-      initialPosition: { x: 0, y: 0 },
+      initialPosition: new Position(0, 0),
       initialDirection: "N",
       planet: {
         height: 5,
@@ -30,7 +31,7 @@ describe("without any obstacles", () => {
     roverRef = Effect.runSync(
       Ref.make<Rover>({
         direction: "N",
-        position: { x: 0, y: 0 },
+        position: new Position(0, 0),
       }),
     );
   });
@@ -117,12 +118,12 @@ describe("with obstacles", () => {
     Config,
     Config.of({
       logMoves: false,
-      initialPosition: { x: 0, y: 0 },
+      initialPosition: new Position(0, 0),
       initialDirection: "N",
       planet: {
         height: 5,
         width: 5,
-        obstacles: [{ x: 2, y: 2 }],
+        obstacles: [new Position(2, 2)],
       },
     }),
   );
@@ -137,12 +138,12 @@ describe("with obstacles", () => {
     roverRef = Effect.runSync(
       Ref.make<Rover>({
         direction: "N",
-        position: { x: 0, y: 0 },
+        position: new Position(0, 0),
       }),
     );
   });
 
-  it("follows command until an obstacle is encountered and ignores the rest", async () => {
+  it("follows commands until an obstacle is encountered and ignores the rest", async () => {
     const program = Effect.gen(function* (_) {
       const commandService = yield* _(CommandService);
 

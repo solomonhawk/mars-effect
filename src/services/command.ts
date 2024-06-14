@@ -1,7 +1,12 @@
 import { Context, Effect, Ref } from "effect";
 import { ObstacleError } from "~/error";
 import { Config } from "~/layers/config";
-import { Command, Direction, Position, Rover } from "~/types";
+import { Position } from "~/position";
+import { Command, Direction, Rover } from "~/types";
+
+export function isCommand(s: string): s is Command {
+  return s === "f" || s === "b" || s === "l" || s === "r";
+}
 
 export class CommandService extends Context.Tag("@app/CommandService")<
   CommandService,
@@ -35,7 +40,10 @@ function runCommand(
   return Effect.gen(function* (_) {
     const { logMoves } = yield* _(Config);
 
-    let nextRover = { ...rover, position: { ...rover.position } };
+    let nextRover = {
+      ...rover,
+      position: new Position(rover.position.x, rover.position.y),
+    };
 
     switch (command) {
       case "b":
@@ -108,7 +116,7 @@ function move(
   return Effect.gen(function* (_) {
     const { planet } = yield* _(Config);
     const movement = reverse ? -1 : 1;
-    let nextPosition = { ...position };
+    let nextPosition = new Position(position.x, position.y);
 
     switch (direction) {
       case "N":

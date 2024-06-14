@@ -1,4 +1,4 @@
-import { Position } from "./types";
+import { Position } from "./position";
 
 export class ObstacleError extends Error {
   _tag = "ObstacleError";
@@ -9,5 +9,9 @@ export class ObstacleError extends Error {
   ) {
     super(message);
     this.name = this.constructor.name;
+  }
+
+  public print() {
+    return `[!] Rover hit an obstacle at x=${this.position.x}, y=${this.position.y}!`;
   }
 }
