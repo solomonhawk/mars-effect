@@ -13,31 +13,40 @@ export function makeObstacles(
 ): Position[] {
   const positions = width * height;
   let obstacleCount = Math.round(positions * density);
-  let obstacles: Set<Position> = new Set();
 
   if (obstacleCount === 0) {
     return [];
   }
 
+  const candidates: Array<Position> = [];
+  const obstacles: Array<Position> = [];
+
+  for (let y = 0; y < height; y++) {
+    for (let x = 0; x < width; x++) {
+      const position = new Position(x, y);
+
+      if (disallowedPositions.some((p) => p.equals(position))) {
+        continue;
+      }
+
+      candidates.push(position);
+    }
+  }
+
+  shuffle(candidates);
+
   while (obstacleCount > 0) {
-    const position = new Position(
-      Math.floor(Math.random() * width),
-      Math.floor(Math.random() * height),
-    );
+    const position = candidates.pop();
 
-    if (obstacles.has(position)) {
-      continue;
+    if (!position) {
+      break;
     }
 
-    if (disallowedPositions.some((p) => p.equals(position))) {
-      continue;
-    }
-
-    obstacles.add(position);
+    obstacles.push(position);
     obstacleCount--;
   }
 
-  return Array.from(obstacles);
+  return obstacles;
 }
 
 export function printPlanetState(
@@ -58,14 +67,12 @@ export function printPlanetState(
 
     for (let y = 0; y < planet.height; y++) {
       for (let x = 0; x < planet.width; x++) {
-        if (rover.position.x === x && rover.position.y === y) {
+        const position = new Position(x, y);
+
+        if (rover.position.equals(position)) {
           planetView += Terminal.highlight(roverIcon(rover.direction));
         } else if (obstacles[y][x]) {
-          if (
-            obstacleCollision &&
-            obstacleCollision.x === x &&
-            obstacleCollision.y === y
-          ) {
+          if (obstacleCollision?.equals(position)) {
             planetView += Terminal.collision("⩍");
           } else {
             planetView += Terminal.emphasize("⩍");
@@ -84,6 +91,20 @@ export function printPlanetState(
 
     yield* Effect.log(Terminal.clear(planetView));
   });
+}
+
+function shuffle<T>(array: T[]) {
+  let currentIndex = array.length;
+
+  while (currentIndex != 0) {
+    let randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
+  }
 }
 
 function roverIcon(direction: Direction): string {
