@@ -4,6 +4,8 @@
     "module": "CommonJS",
     "strict": true,
     "target": "ESNext",
+    "moduleResolution": "Node",
+    "skipLibCheck": true,
     "plugins": [{ "name": "@effect/language-service" }],
     "paths": {
       "~/*": ["./src/*"]

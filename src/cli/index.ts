@@ -42,6 +42,8 @@ const options = {
   ),
 };
 
+export type AppLayersOpts = Command.Command.ParseConfig<typeof options>;
+
 const command = Command.make("mars-rover", options, (opts) => {
   if (
     opts.initialX < 0 ||
