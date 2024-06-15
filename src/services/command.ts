@@ -18,7 +18,11 @@ export class CommandService extends Context.Tag("@app/CommandService")<
         rover: Rover,
         isLast: boolean,
       ) => Effect.Effect<void, never, Config>,
-    ) => Effect.Effect<void, ObstacleError, Config>;
+    ) => Effect.Effect<void, ObstacleError, Config | CommandService>;
+    runCommand: (
+      rover: Rover,
+      command: Command,
+    ) => Effect.Effect<Rover, ObstacleError, Config>;
   }
 >() {}
 
@@ -27,6 +31,8 @@ export type CommandServiceAPI = Context.Tag.Service<CommandService>;
 export const CommandServiceDefaultImpl = {
   runCommands(roverRef, commands, onStep) {
     return Effect.gen(function* () {
+      const { runCommand } = Effect.serviceFunctions(CommandService);
+
       let i = 0;
       let currentRover = yield* roverRef.get;
 
@@ -42,66 +48,63 @@ export const CommandServiceDefaultImpl = {
       }
     });
   },
-} satisfies CommandServiceAPI;
 
-function runCommand(
-  rover: Rover,
-  command: Command,
-): Effect.Effect<Rover, ObstacleError, Config> {
-  return Effect.gen(function* () {
-    const { logMoves } = yield* Config;
+  runCommand(rover: Rover, command: Command) {
+    return Effect.gen(function* () {
+      const { logMoves } = yield* Config;
 
-    let nextRover = {
-      ...rover,
-      position: new Position(rover.position.x, rover.position.y),
-    };
+      let nextRover = {
+        ...rover,
+        position: new Position(rover.position.x, rover.position.y),
+      };
 
-    switch (command) {
-      case "b":
-      case "f": {
-        nextRover.position = yield* move(
-          rover.position,
-          rover.direction,
-          command === "b",
+      switch (command) {
+        case "b":
+        case "f": {
+          nextRover.position = yield* move(
+            rover.position,
+            rover.direction,
+            command === "b",
+          );
+
+          if (logMoves) {
+            yield* Effect.log(
+              `moving ${command} ${rover.direction} => ${JSON.stringify(nextRover, null, 2)}`,
+            );
+          }
+
+          break;
+        }
+
+        case "l":
+        case "r": {
+          nextRover.direction = yield* rotate(rover.direction, command === "r");
+
+          if (logMoves) {
+            yield* Effect.log(
+              `turning ${command} from ${rover.direction} => ${JSON.stringify(nextRover, null, 2)}`,
+            );
+          }
+
+          break;
+        }
+
+        default:
+          return yield* Effect.succeed(rover);
+      }
+
+      const collision = yield* detectCollision(nextRover);
+
+      if (collision) {
+        return yield* Effect.fail(
+          new ObstacleError("Hit something!", nextRover.position),
         );
-
-        if (logMoves) {
-          yield* Effect.log(
-            `moving ${command} ${rover.direction} => ${JSON.stringify(nextRover, null, 2)}`,
-          );
-        }
-
-        break;
       }
 
-      case "l":
-      case "r": {
-        nextRover.direction = yield* rotate(rover.direction, command === "r");
-
-        if (logMoves) {
-          yield* Effect.log(
-            `turning ${command} from ${rover.direction} => ${JSON.stringify(nextRover, null, 2)}`,
-          );
-        }
-
-        break;
-      }
-
-      default:
-        return yield* Effect.succeed(rover);
-    }
-
-    const collision = yield* detectCollision(nextRover);
-
-    if (collision) {
-      return yield* Effect.fail(
-        new ObstacleError("Hit something!", nextRover.position),
-      );
-    }
-
-    return yield* Effect.succeed(nextRover);
-  });
-}
+      return yield* Effect.succeed(nextRover);
+    });
+  },
+} satisfies CommandServiceAPI;
 
 function rotate(
   direction: Direction,

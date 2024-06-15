@@ -55,6 +55,7 @@ const command = Cmd.make(
     }
 
     return program.pipe(
+      Effect.provideService(CommandService, CommandServiceDefaultImpl),
       Effect.provideService(Config, {
         playbackSpeed: opts.playbackSpeed,
         initialDirection: opts.initialDirection,
@@ -71,7 +72,6 @@ const command = Cmd.make(
           ),
         },
       }),
-      Effect.provideService(CommandService, CommandServiceDefaultImpl),
     );
   },
 );
