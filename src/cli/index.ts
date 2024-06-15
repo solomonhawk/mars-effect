@@ -1,8 +1,15 @@
-import { Command, HelpDoc, Options, ValidationError } from "@effect/cli";
+import { Command, Options } from "@effect/cli";
 import { NodeContext, NodeRuntime } from "@effect/platform-node";
+import { Schema } from "@effect/schema";
 import { Effect } from "effect";
 import { program } from "./program";
 import { makeAppLayersLive } from "~/layers";
+
+const coordinate = Schema.Number.pipe(Schema.positive());
+const planetDimension = Schema.Number.pipe(
+  Schema.positive(),
+  Schema.greaterThan(3),
+);
 
 const options = {
   initialDirection: Options.choice("initialDir", ["N", "S", "E", "W"]).pipe(
@@ -14,48 +21,61 @@ const options = {
     Options.withDescription("Initial rover X position"),
     Options.withAlias("x"),
     Options.withDefault(4),
+    Options.withSchema(coordinate),
   ),
   initialY: Options.integer("initialY").pipe(
     Options.withDescription("Initial rover Y position"),
     Options.withAlias("y"),
     Options.withDefault(4),
+    Options.withSchema(coordinate),
   ),
   width: Options.integer("width").pipe(
     Options.withDescription("Planet width"),
     Options.withAlias("w"),
     Options.withDefault(10),
+    Options.withSchema(planetDimension),
   ),
   height: Options.integer("height").pipe(
     Options.withDescription("Planet height"),
     Options.withAlias("h"),
     Options.withDefault(10),
+    Options.withSchema(planetDimension),
   ),
   obstacleDensity: Options.float("obstacleDensity").pipe(
     Options.withDescription("Obstacle density decimal percentage (0 - 1)"),
     Options.withAlias("o"),
     Options.withDefault(0.2),
+    Options.withSchema(Schema.Number.pipe(Schema.clamp(0, 1))),
   ),
   playbackSpeed: Options.float("playbackSpeed").pipe(
     Options.withDescription("Playback speed in milliseconds"),
     Options.withAlias("s"),
     Options.withDefault(250),
+    Options.withSchema(Schema.Number.pipe(Schema.nonNegative())),
   ),
 };
 
 export type AppLayersOpts = Command.Command.ParseConfig<typeof options>;
 
-const command = Command.make("mars-rover", options, (opts) => {
-  if (
-    opts.initialX < 0 ||
-    opts.initialY < 0 ||
-    opts.initialX >= opts.width ||
-    opts.initialY >= opts.height
-  ) {
-    throw ValidationError.invalidArgument(
-      HelpDoc.p("Initial position is out of bounds"),
-    );
-  }
+const Opts = Schema.Struct({
+  initialX: coordinate,
+  initialY: coordinate,
+  width: planetDimension,
+  height: planetDimension,
+}).pipe(
+  Schema.filter((opts) => {
+    if (opts.initialX >= opts.width) {
+      return "X position is out of bounds";
+    }
 
+    if (opts.initialY >= opts.height) {
+      return "Y position is out of bounds";
+    }
+  }),
+);
+
+const command = Command.make("mars-rover", options, (opts) => {
+  Schema.decodeSync(Opts)(opts);
   return program.pipe(Effect.provide(makeAppLayersLive(opts)));
 });
 
