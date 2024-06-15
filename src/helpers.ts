@@ -3,6 +3,7 @@ import { Direction, Rover } from "./types";
 import { Config } from "./layers/config";
 import { Position } from "./position";
 import { Terminal } from "./terminal";
+import { State } from "./layers/state";
 
 export function makeObstacles(
   width: number,
@@ -42,7 +43,7 @@ export function makeObstacles(
 export function printPlanetState(
   rover: Rover,
   obstacleCollision?: Position,
-): Effect.Effect<void, never, Config> {
+): Effect.Effect<void, never, Config | State> {
   return Effect.gen(function* () {
     const { planet } = yield* Config;
     const obstacles = new Array(planet.height)

@@ -1,6 +1,7 @@
 import { Context, Layer } from "effect";
+import { makeObstacles } from "~/helpers";
 import { Position } from "~/position";
-import { Direction, Planet } from "~/types";
+import { AppLayersOpts, Direction, Planet } from "~/types";
 
 export class Config extends Context.Tag("@app/Config")<
   Config,
@@ -11,19 +12,43 @@ export class Config extends Context.Tag("@app/Config")<
     readonly logMoves: boolean;
     readonly planet: Planet;
   }
->() {}
+>() {
+  static Live = Layer.succeed(
+    Config,
+    Config.of({
+      playbackSpeed: 200,
+      initialPosition: new Position(0, 0),
+      initialDirection: "N",
+      logMoves: true,
+      planet: {
+        height: 5,
+        width: 5,
+        obstacles: [],
+      },
+    }),
+  );
+}
 
-export const ConfigLive = Layer.succeed(
-  Config,
-  Config.of({
-    playbackSpeed: 200,
-    initialPosition: new Position(0, 0),
-    initialDirection: "N",
-    logMoves: true,
-    planet: {
-      height: 5,
-      width: 5,
-      obstacles: [],
-    },
-  }),
-);
+export function makeConfigLive(opts: AppLayersOpts) {
+  const initialPosition = new Position(opts.initialX, opts.initialY);
+
+  return Layer.succeed(
+    Config,
+    Config.of({
+      playbackSpeed: opts.playbackSpeed,
+      initialPosition,
+      initialDirection: opts.initialDirection,
+      logMoves: false,
+      planet: {
+        height: opts.height,
+        width: opts.width,
+        obstacles: makeObstacles(
+          opts.width,
+          opts.height,
+          opts.obstacleDensity,
+          [initialPosition],
+        ),
+      },
+    }),
+  );
+}

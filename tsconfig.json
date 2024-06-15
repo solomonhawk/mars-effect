@@ -3,7 +3,7 @@
     "noEmit": true,
     "module": "CommonJS",
     "strict": true,
-    "downlevelIteration": true,
+    "target": "ESNext",
     "plugins": [{ "name": "@effect/language-service" }],
     "paths": {
       "~/*": ["./src/*"]

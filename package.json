@@ -6,8 +6,8 @@
   "scripts": {
     "start": "npx tsx src/index.ts",
     "cli": "npx tsx src/cli/index.ts",
-    "test": "vitest",
-    "test:watch": "vitest --watch"
+    "test": "vitest run",
+    "test:watch": "vitest watch"
   },
   "author": "Solomon Hawk <dyrenh@gmail.com> (https://solomonhawk.com)",
   "license": "ISC",

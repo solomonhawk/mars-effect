@@ -1,44 +1,26 @@
-import { Context, Effect, Ref } from "effect";
+import { Context, Effect, Layer, Ref } from "effect";
 import { ObstacleError } from "~/error";
 import { Config } from "~/layers/config";
 import { Position } from "~/position";
-import { Command, Direction, Rover } from "~/types";
+import { Cmd, Direction, Rover } from "~/types";
+import { State } from "./state";
 
-export function isCommand(s: string): s is Command {
+export function isCmd(s: string): s is Cmd {
   return s === "f" || s === "b" || s === "l" || s === "r";
 }
 
-export class CommandService extends Context.Tag("@app/CommandService")<
-  CommandService,
-  {
-    runCommands: (
-      roverRef: Ref.Ref<Rover>,
-      commands: Command[],
-      onStep?: (
-        rover: Rover,
-        isLast: boolean,
-      ) => Effect.Effect<void, never, Config>,
-    ) => Effect.Effect<void, ObstacleError, Config | CommandService>;
-    runCommand: (
-      rover: Rover,
-      command: Command,
-    ) => Effect.Effect<Rover, ObstacleError, Config>;
-  }
->() {}
-
-export type CommandServiceAPI = Context.Tag.Service<CommandService>;
-
-export const CommandServiceDefaultImpl = {
-  runCommands(roverRef, commands, onStep) {
+export const CommandLiveImpl = {
+  runCommands(commands, onStep) {
     return Effect.gen(function* () {
-      const { runCommand } = Effect.serviceFunctions(CommandService);
+      const { rover } = yield* State;
+      const { runCommand } = yield* Command;
 
       let i = 0;
-      let currentRover = yield* roverRef.get;
+      let currentRover = yield* rover.get;
 
       for (const c of commands) {
         currentRover = yield* runCommand(currentRover, c);
-        yield* Ref.set(roverRef, currentRover);
+        yield* Ref.set(rover, currentRover);
 
         if (onStep) {
           yield* onStep(currentRover, i === commands.length - 1);
@@ -49,7 +31,7 @@ export const CommandServiceDefaultImpl = {
     });
   },
 
-  runCommand(rover: Rover, command: Command) {
+  runCommand(rover: Rover, command: Cmd) {
     return Effect.gen(function* () {
       const { logMoves } = yield* Config;
 
@@ -104,7 +86,7 @@ export const CommandServiceDefaultImpl = {
       return yield* Effect.succeed(nextRover);
     });
   },
-} satisfies CommandServiceAPI;
+} satisfies CommandAPI;
 
 function rotate(
   direction: Direction,
@@ -170,3 +152,24 @@ function wrap(n: number, min: number, max: number): number {
 
   return next;
 }
+
+export class Command extends Context.Tag("@app/Command")<
+  Command,
+  {
+    runCommands: (
+      commands: Cmd[],
+      onStep?: (
+        rover: Rover,
+        isLast: boolean,
+      ) => Effect.Effect<void, never, Config | State>,
+    ) => Effect.Effect<void, ObstacleError, Config | Command | State>;
+    runCommand: (
+      rover: Rover,
+      command: Cmd,
+    ) => Effect.Effect<Rover, ObstacleError, Config>;
+  }
+>() {
+  static Live = Layer.succeed(Command, Command.of(CommandLiveImpl));
+}
+
+export type CommandAPI = Context.Tag.Service<Command>;
