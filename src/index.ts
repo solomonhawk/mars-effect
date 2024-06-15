@@ -1,8 +1,8 @@
 import { Effect, Layer } from "effect";
 import { Command } from "./layers/command";
 import { Config } from "./layers/config";
-import { program } from "./program";
 import { State } from "./layers/state";
+import { program } from "./program";
 
 const runnable = program.pipe(
   Effect.provide(

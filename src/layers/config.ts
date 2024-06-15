@@ -1,7 +1,7 @@
 import { Context, Layer } from "effect";
 import { makeObstacles } from "~/helpers";
 import { Position } from "~/position";
-import { AppLayersOpts, Direction, Planet } from "~/types";
+import { type AppLayersOpts, type Direction, type Planet } from "~/types";
 
 export class Config extends Context.Tag("@app/Config")<
   Config,

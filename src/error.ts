@@ -1,4 +1,4 @@
-import { Position } from "./position";
+import { type Position } from "./position";
 
 export class ObstacleError extends Error {
   _tag = "ObstacleError";

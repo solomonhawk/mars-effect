@@ -1,9 +1,9 @@
 import { Context, Effect, Layer, Ref } from "effect";
+import { State } from "./state";
 import { ObstacleError } from "~/error";
 import { Config } from "~/layers/config";
 import { Position } from "~/position";
-import { Cmd, Direction, Rover } from "~/types";
-import { State } from "./state";
+import { type Cmd, type Direction, type Rover } from "~/types";
 
 export function isCmd(s: string): s is Cmd {
   return s === "f" || s === "b" || s === "l" || s === "r";

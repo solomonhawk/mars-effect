@@ -1,6 +1,7 @@
 # Mars Rover
 
-An implementation of the mars rover kata in TypeScript using [EffectTS](https://effect.website/).
+An implementation of the mars rover kata in TypeScript using
+[EffectTS](https://effect.website/).
 
 ## Links
 
@@ -38,11 +39,22 @@ Run tests in watch mode:
 
 ## Thoughts
 
-- I enjoy this programming paradigm (I read one description that suggested that Effect is to TS what NextJS or Remix is to React, which is interesting - it is described as a superset of TS)
-- It's a steep learning curve, and I wouldn't reach for Effect on a production client application unless I knew that the team supporting it was bought in already
-- The benefits of the approach are less apparent at smaller scales, but I can imagine how it begins to pay off as an application grows and changes over time
-- The TS magic is pretty amazing. Having type-checked dependency injection is quite interesting
+- I enjoy this programming paradigm (I read one description that suggested that
+  Effect is to TS what NextJS or Remix is to React, which is interesting - it is
+  described as a superset of TS)
+- It's a steep learning curve, and I wouldn't reach for Effect on a production
+  client application unless I knew that the team supporting it was bought in
+  already
+- The benefits of the approach are less apparent at smaller scales, but I can
+  imagine how it begins to pay off as an application grows and changes over time
+- The TS magic is pretty amazing. Having type-checked dependency injection is
+  quite interesting
 - Everything is more complicated, due to the indirection introduced by Effect
-- It's different (and a bit unfamiliar) to think about structuring an application using effects rather than the usual data/immediate functions/control flow
-- `Effect.gen(..)` is super useful and nice to write except for all the `yield* _(..)` noise, which is a bummer
-- One of the drawbacks that I dislike is that it feels like a lot of code must be "framework/library" code rather than app/domain code - I don't find the result to be very readable
+- It's different (and a bit unfamiliar) to think about structuring an
+  application using effects rather than the usual data/immediate
+  functions/control flow
+- `Effect.gen(..)` is super useful and nice to write except for all the
+  `yield* _(..)` noise, which is a bummer
+- One of the drawbacks that I dislike is that it feels like a lot of code must
+  be "framework/library" code rather than app/domain code - I don't find the
+  result to be very readable

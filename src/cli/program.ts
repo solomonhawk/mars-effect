@@ -4,7 +4,7 @@ import { printPlanetState } from "~/helpers";
 import { Command, isCmd } from "~/layers/command";
 import { Config } from "~/layers/config";
 import { State } from "~/layers/state";
-import { Cmd } from "~/types";
+import { type Cmd } from "~/types";
 
 export const program = Effect.gen(function* () {
   let quit = false;

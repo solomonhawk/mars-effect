@@ -7,7 +7,10 @@
     "start": "npx tsx src/index.ts",
     "cli": "npx tsx src/cli/index.ts",
     "test": "vitest run",
-    "test:watch": "vitest watch"
+    "test:watch": "vitest watch",
+    "format": "prettier --write .",
+    "lint": "eslint --max-warnings=0 .",
+    "lint:fix": "eslint --max-warnings=0 --fix ."
   },
   "author": "Solomon Hawk <dyrenh@gmail.com> (https://solomonhawk.com)",
   "license": "ISC",
@@ -20,18 +23,18 @@
   },
   "devDependencies": {
     "@effect/language-service": "^0.1.0",
+    "@epic-web/config": "^1.11.2",
+    "@eslint/js": "^9.5.0",
     "@types/node": "^20.14.2",
-    "eslint": "^9.4.0",
+    "eslint": "^9.5.0",
+    "globals": "^15.4.0",
     "prettier": "^3.3.2",
+    "prettier-plugin-tailwindcss": "^0.6.4",
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.15.4",
     "typescript": "^5.6.0-dev.20240614",
+    "typescript-eslint": "^8.0.0-alpha.30",
     "vite-tsconfig-paths": "^4.3.2",
     "vitest": "^1.6.0"
-  },
-  "prettier": {
-    "semi": true,
-    "singleQuote": false,
-    "trailingComma": "all"
   }
 }

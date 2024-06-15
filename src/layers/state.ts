@@ -1,6 +1,6 @@
 import { Context, Effect, Layer, Ref } from "effect";
-import { Rover } from "~/types";
 import { Config } from "./config";
+import { type Rover } from "~/types";
 
 export class State extends Context.Tag("@app/State")<
   State,

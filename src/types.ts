@@ -1,4 +1,4 @@
-import { Position } from "./position";
+import { type Position } from "./position";
 
 // @NOTE: this type should be derivable from the CLI options using Command.ParseConfig<C>
 export type AppLayersOpts = {

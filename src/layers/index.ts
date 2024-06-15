@@ -1,8 +1,8 @@
 import { Layer } from "effect";
-import { AppLayersOpts } from "~/types";
+import { Command } from "./command";
 import { makeConfigLive } from "./config";
 import { State } from "./state";
-import { Command } from "./command";
+import { type AppLayersOpts } from "~/types";
 
 export function makeAppLayersLive(opts: AppLayersOpts) {
   return Layer.mergeAll(State.Live, Command.Live).pipe(

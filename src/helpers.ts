@@ -1,9 +1,9 @@
 import { Effect } from "effect";
-import { Direction, Rover } from "./types";
 import { Config } from "./layers/config";
+import { type State } from "./layers/state";
 import { Position } from "./position";
 import { Terminal } from "./terminal";
-import { State } from "./layers/state";
+import { type Direction, type Rover } from "./types";
 
 export function makeObstacles(
   width: number,
